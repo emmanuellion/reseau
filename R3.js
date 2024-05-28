@@ -9,12 +9,13 @@ app.use(express.json());
 const secret = 'R3-Secret';
 
 let routingTable = [
-	{ destination: '10.1.2.0', mask: '255.255.255.252', gateway: '10.1.2.2', interface: 'eth2', distance: 1, port: 3002 },
-	{ destination: '10.1.5.0', mask: '255.255.255.252', gateway: '10.1.5.1', interface: 'eth5', distance: 1, port: 3006 }
+	{ destination: '10.1.2.0', mask: '255.255.255.252', distance: 1, port: 3002 },
+	{ destination: '10.1.5.0', mask: '255.255.255.252', distance: 1, port: 3005 }
 ];
 
 const neighbors = [
-	{ url: 'http://localhost:3002', address: '10.1.2.2', port: 3002 }
+	{ url: 'http://localhost:3002', address: '10.1.2.1', port: 3002 },
+	{ url: 'http://localhost:3005', address: '10.1.5.1', port: 3005 }
 ];
 
 app.post('/message', async (req, res) => {

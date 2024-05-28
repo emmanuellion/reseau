@@ -9,22 +9,24 @@ app.use(express.json());
 const secret = 'R2-Secret';
 
 let routingTable = [
-	{ destination: '10.1.1.0', mask: '255.255.255.252', gateway: '10.1.1.1', interface: 'eth1', distance: 1, port: 3001 },
-	{ destination: '10.1.2.0', mask: '255.255.255.252', gateway: '10.1.2.1', interface: 'eth2', distance: 1, port: 3003 },
-	{ destination: '10.1.3.0', mask: '255.255.255.252', gateway: '10.1.3.1', interface: 'eth3', distance: 1, port: 3004 },
-	{ destination: '10.1.4.0', mask: '255.255.255.252', gateway: '10.1.4.1', interface: 'eth4', distance: 1, port: 3005 }
+	{ destination: '10.1.1.0', mask: '255.255.255.252', distance: 1, port: 3001 },
+	{ destination: '10.1.2.0', mask: '255.255.255.252', distance: 1, port: 3003 },
+	{ destination: '10.1.3.0', mask: '255.255.255.252', distance: 1, port: 3004 },
+	{ destination: '10.1.4.0', mask: '255.255.255.252', distance: 1, port: 3005 }
 ];
 
 const neighbors = [
 	{ url: 'http://localhost:3001', address: '10.1.1.1', port: 3001 },
-	{ url: 'http://localhost:3003', address: '10.1.2.2', port: 3003 }
+	{ url: 'http://localhost:3003', address: '10.1.2.2', port: 3003 },
+	{ url: 'http://localhost:3004', address: '10.1.3.2', port: 3004 },
+	{ url: 'http://localhost:3005', address: '10.1.4.2', port: 3005 }
 ];
 
 app.post('/message', async (req, res) => {
 	const { message, destination } = req.body;
 	console.log(`Received message at R2: ${message} for ${destination}`);
 
-	if (destination === '10.1.2.1') {
+	if (['10.1.1.2', '10.1.2.1', '10.1.3.1', '10.1.4.1'].includes(destination)) {
 		return res.json({ message: `Secret: ${secret}`, routingTable });
 	}
 

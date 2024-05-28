@@ -14,7 +14,7 @@ async function sendMessage(destination, message) {
 	}
 }
 
-const destination = { ip: '10.1.5.0', port: 3003 }; // Destination R3
-const message = 'Hello, R3!';
+const destination = { ip: '10.1.6.1', port: 3006 }; // Destination R3
+const message = 'Hello, R5!';
 
 sendMessage(destination, message);
