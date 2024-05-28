@@ -1,0 +1,114 @@
+main_test.go ```go
+package main
+
+import (
+	"encoding/json"
+	"testing"
+)
+
+func TestRoutingTables(t *testing.T) {
+	// Expected initial routing tables
+	expectedTables := map[string]RoutingTable{
+		"R1": {Routes: map[string]string{"192.168.1.0/24": "192.168.1.254"}},
+		"R2": {Routes: map[string]string{"10.1.1.0/30": "10.1.1.1", "10.1.2.0/30": "10.1.2.1", "10.1.3.0/30": "10.1.3.1", "10.1.4.0/30": "10.1.4.1"}},
+		"R3": {Routes: map[string]string{"10.1.2.0/30": "10.1.2.2", "10.1.5.0/30": "10.1.5.1"}},
+		"R4": {Routes: map[string]string{"10.1.3.0/30": "10.1.3.2", "10.1.6.0/30": "10.1.6.1"}},
+		"R5": {Routes: map[string]string{"10.1.4.0/30": "10.1.4.2", "10.1.5.0/30": "10.1.5.2", "10.1.6.0/30": "10.1.6.2", "10.1.7.0/30": "10.1.7.1"}},
+		"R6": {Routes: map[string]string{"10.1.7.0/30": "10.1.7.2", "172.16.180.0/24": "172.16.180.251"}},
+	}
+
+	// Serialized routing tables
+	for router, expectedTable := range expectedTables {
+		routingTableJSON, err := json.Marshal(expectedTable)
+		if err != nil {
+			t.Fatalf("Error marshalling routing table for %s: %v", router, err)
+		}
+
+		// Simulate receiving the table
+		var receivedTable RoutingTable
+		err = json.Unmarshal(routingTableJSON, &receivedTable)
+		if err != nil {
+			t.Fatalf("Error unmarshalling routing table for %s: %v", router, err)
+		}
+
+		// Verify the routing table
+		if !compareRoutingTables(receivedTable, expectedTable) {
+			t.Errorf("Routing table for %s does not match. Got %v, expected %v", router, receivedTable, expectedTable)
+		}
+	}
+}
+
+func compareRoutingTables(a, b RoutingTable) bool {
+	if len(a.Routes) != len(b.Routes) {
+		return false
+	}
+	for k, v := range a.Routes {
+		if b.Routes[k] != v {
+			return false
+		}
+	}
+	return true
+}
+
+func TestBellmanFord(t *testing.T) {
+	graphExamples := []struct {
+		vertices []string
+		edges    []Edge
+		start    string
+		end      string
+		expected map[string]int
+	}{
+		{
+			vertices: []string{"A", "B", "C", "D"},
+			edges: []Edge{
+				{"A", "B", 1},
+				{"A", "C", 4},
+				{"B", "C", 2},
+				{"B", "D", 5},
+				{"C", "D", 1},
+			},
+			start:    "A",
+			end:      "D",
+			expected: map[string]int{"A": 0, "B": 1, "C": 3, "D": 4},
+		},
+		{
+			vertices: []string{"A", "B", "C"},
+			edges: []Edge{
+				{"A", "B", 2},
+				{"A", "C", 1},
+				{"B", "C", 2},
+			},
+			start:    "A",
+			end:      "C",
+			expected: map[string]int{"A": 0, "B": 2, "C": 1},
+		},
+		{
+			vertices: []string{"A", "B", "C", "D"},
+			edges: []Edge{
+				{"A", "B", 1},
+				{"A", "C", 4},
+				{"B", "C", -1},
+				{"B", "D", 2},
+				{"C", "D", 1},
+			},
+			start:    "A",
+			end:      "D",
+			expected: map[string]int{"A": 0, "B": 1, "C": 0, "D": 1},
+		},
+	}
+
+	for i, example := range graphExamples {
+		distance, _, err := BellmanFord(example.edges, example.vertices, example.start)
+		if err != nil {
+			t.Fatalf("Error running Bellman-Ford algorithm on example %d: %v", i+1, err)
+		}
+
+		// Verify the distances
+		for vertex, expectedDistance := range example.expected {
+			if distance[vertex] != expectedDistance {
+				t.Errorf("Example %d: Distance to %s incorrect. Got %d, expected %d", i+1, vertex, distance[vertex], expectedDistance)
+			}
+		}
+	}
+}
+```
